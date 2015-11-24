@@ -1703,8 +1703,10 @@ CUSTOM_TARGET_PACKAGE := $(PRODUCT_OUT)/SlimSaber-$(ROM_VERSION).zip
 otapackage: $(INTERNAL_OTA_PACKAGE_TARGET)
 bacon: otapackage
 	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(CUSTOM_TARGET_PACKAGE)
-	$(hide) $(MD5SUM) $(CUSTOM_TARGET_PACKAGE) > $(CUSTOM_TARGET_PACKAGE).md5sum
-	@echo -e ${PRT_CPL}"Package complete: $(CUSTOM_TARGET_PACKAGE)"${CL_RST}
+ifdef FINISHER_SCRIPT
+	@echo -e ${CL_YLW}"Running finisher..."${CL_RST}
+	$(hide) $(FINISHER_SCRIPT) $@
+endif
 
 endif    # recovery_fstab is defined
 endif    # TARGET_NO_KERNEL != true
