@@ -621,6 +621,7 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   device_specific.FullOTA_InstallBegin()
 
   if OPTIONS.backuptool:
+    script.Print("Backup...")
     script.Mount("/system", OPTIONS.mount_by_label)
     script.RunBackup("backup")
     if not OPTIONS.mount_by_label:
@@ -632,16 +633,24 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
     script.Print("Formatting /data")
     script.FormatPartition("/data", OPTIONS.mount_by_label)
 
-  script.Print("#######################################");
-  script.Print("# _____            __  __  ______     #");
-  script.Print("#/\  __`\  /'\_/`\/\ \/\ \/\__  _\    #");
-  script.Print("#\ \ \/\ \/\  ``  \ \ ` \ \/_/\ \/    #");
-  script.Print("# \ \ \ \ \ \ \__\ \ \ . ` \ \ \ \    #");
-  script.Print("#  \ \ \_\ \ \ \_/\ \ \ \`\ \ \_\ \__ #");
-  script.Print("#   \ \_____\ \_\, \_\ \_\ \_\/\_____\#");
-  script.Print("#    \/_____/\/_/ \/_/\/_/\/_/\/_____/#");
-  script.Print("#                                     #");
-  script.Print("#######################################");
+  script.Print(" ")
+  script.Print(" (               (                        ")
+  script.Print(" )\ ) (          )\ )         )           ")
+  script.Print("(()/( )\(     ) (()/(    ) ( /(    (  (   ")
+  script.Print(" /(_)|(_)\   (   /(_))( /( )\())  ))\ )(  ")
+  script.Print("(_))  _((_)  ) '(_))  )(_)|(_)\  /((_|()\ ")
+  script.Print("/ __|| |(_)_((_)/ __|((_)_| |(_)(_))  ((_)")
+  script.Print("\__ \| || | '   \__ \/ _' | '_ \/ -_)| '_|")
+  script.Print("|___/|_||_|_|_|_|___/\__,_|_.__/\___||_|  ")
+  script.Print(" ")
+
+  build = GetBuildProp("ro.build.date", OPTIONS.info_dict)
+  script.Print("Compiled: %s"%(build));
+
+  device = GetBuildProp("ro.product.device", OPTIONS.info_dict)
+  model = GetBuildProp("ro.product.model", OPTIONS.info_dict)
+  script.Print("Device: %s (%s)"%(model, device));
+  script.Print(" ")
 
   system_progress = 0.75
 
@@ -668,18 +677,18 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
     system_diff = common.BlockDifference("system", system_tgt, src=None)
     system_diff.WriteScript(script, output_zip)
   else:
-    script.Print("Formatting /system")
+    script.Print("Formatting /system...")
     script.FormatPartition("/system")
     if not OPTIONS.mount_by_label:
       script.Mount("/system", recovery_mount_options)
 #    if not has_recovery_patch:
 #      script.UnpackPackageDir("recovery", "/system")
 
-    script.Print("Extracting /system")
+    script.Print("Installing ROM, please wait...")
     script.UnpackPackageDir("system", "/system")
 
     symlinks = CopyPartitionFiles(system_items, input_zip, output_zip)
-    script.Print("Symlinking")
+    script.Print("Symlinking...")
     script.MakeSymlinks(symlinks)
 
   boot_img = common.GetBootableImage("boot.img", "boot.img",
@@ -720,16 +729,17 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   common.ZipWriteStr(output_zip, "boot.img", boot_img.data)
 
   if OPTIONS.backuptool:
+    script.Print("Restoring...")
     script.ShowProgress(0.2, 10)
     script.RunBackup("restore")
 
   script.ShowProgress(0.2, 10)
-  script.Print("Flashing boot.img")
+  script.Print("Flashing boot image...")
   bootpartition = "/boot" if OPTIONS.override_boot_partition == "" else OPTIONS.override_boot_partition
   script.WriteRawImage(bootpartition, "boot.img")
 
   script.ShowProgress(0.1, 0)
-  script.Print("Enjoy OMNI ROM!");
+  script.Print("Enjoy SlimSaber!");
   device_specific.FullOTA_InstallEnd()
 
   if OPTIONS.extra_script is not None:
